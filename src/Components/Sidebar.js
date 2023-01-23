@@ -2,16 +2,18 @@ import React from 'react'
 import styled from 'styled-components'
 
 
-const SideBarItem = ({className, title}) => {
+const SideBarItem = ({ className, title, handleClick }) => {
   return (
-    <li className={className}>{title}</li>
+    <li onClick={() => handleClick(title)} className={className} value={title}>{title}</li>
   )
 }
 
 // takes in a list of items and displays them in a column
-const SideBarList = ({ className, items }) => {
+const SideBarList = ({ className, items, handleClick }) => {
   return (
-    <ul className={className}>{items.map((item,i) => <StyledSideBarItem title={item} key={i} />)}</ul>
+    <ul className={className}> {items.map((item, i) =>
+      <StyledSideBarItem handleClick={handleClick} title={item} key={`${item}-${i}`} />)}
+    </ul>
   )
 }
 
@@ -58,6 +60,6 @@ const StyledSideBarList = styled(SideBarList)`
 
 
 // render the resulting styled side bar
-export const Sidebar = () => {
-   return  <StyledSideBarList items={["main", "secondary", "third", "another", "last"]} />          
+export const Sidebar = ({ onSelection }) => {
+  return <StyledSideBarList items={["main", "secondary", "third", "another", "last"]} handleClick={onSelection} />
 }
