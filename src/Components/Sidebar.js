@@ -7,25 +7,41 @@ const SideBarItem = ({className, title}) => {
     <li className={className}>{title}</li>
   )
 }
-const StyledSideBarItem = styled(SideBarItem)`
-  margin: 10px 10px;
-  border-radius: 11px;
-  border: 1px solid transparent;
-  transition: 100ms ease-in all;
-  &:hover{
-    background: rgba(0,0,0,0.1);
-    color: white;
-    box-shadow: 0px 0px 0px 0.3px #344888;
-  }
-`
 
-
-// takes in a list of items
+// takes in a list of items and displays them in a column
 const SideBarList = ({ className, items }) => {
   return (
     <ul className={className}>{items.map((item,i) => <StyledSideBarItem title={item} key={i} />)}</ul>
   )
 }
+
+const StyledSideBarItem = styled(SideBarItem)`
+  margin: 10px 5px;
+  border-radius: 4px;
+  transition: 100ms ease-in background;
+  color: #cccccc;
+  // prevent movement on hover
+  border: 1px solid transparent; 
+
+
+  &:hover{
+    background: rgba(0,0,0,0.05);
+    color: #fff;
+    cursor: pointer;
+  }
+  &:active{
+    box-shadow: 0px 0px 0px 0.3px #344888;
+  }
+  &.active{
+    border-left: 1px solid rgba(255,255,255,0.2); 
+    background: rgba(0,0,0,0.1);
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+`
+
+
+
 
 const StyledSideBarList = styled(SideBarList)`
   line-height: 3;
