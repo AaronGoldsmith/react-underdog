@@ -19,10 +19,12 @@ const ProjectContainer = styled.div`
 const Project = ({children}) => {
  return <ProjectContainer> {children}</ProjectContainer>
 }
-export const ContentContainer = ({children}) => {
+
+export const ContentContainer = ({children, title}) => {
   return (
     <ContentLayout>
        <h3>Project Content</h3>
+       {title}
         <Project>{children}</Project>
     </ContentLayout>
   )
