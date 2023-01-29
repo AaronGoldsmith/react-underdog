@@ -30,9 +30,19 @@ const Watermarker = () => {
       
       p.imageLoaded = () => {
         // Update the canvas size
+        img.width = p.width
+        img.height = p.height 
         p.resizeCanvas(img.width, img.height);
         // Draw the image and the watermark
         p.drawImage();
+      }
+      p.submitForm = () => {
+        // Load the image from the entered URL
+        img = p.loadImage(document.getElementById('imageUrl').value, p.imageLoaded);
+        // Update the canvas size
+        //resizeCanvas(img.width, img.height);
+        // Set the watermark text
+        watermarkText = document.getElementById('watermark').value;
       }
 
       p.setup = () => {
@@ -78,7 +88,7 @@ const Watermarker = () => {
         p.fill(wm.r, wm.g, wm.b, 255*watermarkOpacity);
         p.textSize(32*watermarkSize);
       
-          if (iconImg) {
+        if (iconImg) {
           p.image(iconImg, watermarkX, watermarkY, iconImg.width * watermarkSize, iconImg.height * watermarkSize);
         }
         else{
@@ -97,15 +107,20 @@ const Watermarker = () => {
         }
       }
       
-      p.submitForm = () => {
-        // Load the image from the entered URL
-        img = p.loadImage(document.getElementById('imageUrl').value, p.imageLoaded);
-        // Update the canvas size
-        //resizeCanvas(img.width, img.height);
-        // Set the watermark text
+      p.submitForm = (e) => {
         watermarkText = document.getElementById('watermark').value;
       }
-      
+      p.keyReleased = (e) => {
+        if(e.key === "Enter"){
+          console.log("loading" + e.target.value)
+
+          let inputText = e.target.value//document.activeElement.id
+          img = p.loadImage(inputText, p.imageLoaded)
+        }
+        if(e.target.id==="watermark"){
+          watermarkText = e.target.value;
+        }
+      }
       p.saveImage = () => {
         let imageData = p.get(0, 0, img.width, img.height);
         let now = new Date().toLocaleString()
@@ -117,7 +132,13 @@ const Watermarker = () => {
       }
 
       p.draw = () => {
-        p.drawImage();
+        if(p.mouseIsPressed){
+          p.drawImage();
+          if(p.mouseX > 0 && p.mouseX < img.width && p.mouseY > 0 && p.mouseY<img.height){
+            watermarkX = p.mouseX - p.textWidth(watermarkText)/2
+            watermarkY = p.mouseY - p.textAscent(watermarkText);
+          }
+        }
       }
     });
     return () => myP5.remove();
@@ -139,9 +160,7 @@ const Watermarker = () => {
 
 
 
-// p.keyReleased = () => {
-//     watermarkText = document.getElementById('watermark').value;
-// }
+
 
 // p.createOpacitySlider = () => {
 //   let slider = p.createSlider(0, 1, 0.5, 0.01);
