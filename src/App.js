@@ -18,7 +18,6 @@ function App() {
           {pageSelection === "main" && <P5Wrapper />}
           {pageSelection === "secondary" &&  <Watermarker />}
           {/* component 3 */}
-
         </ContentContainer>
       </SplitScreen>
     </div>
