@@ -1,8 +1,8 @@
-// import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react';
 import { Sidebar } from './Components/Sidebar';
 import { SplitScreen } from './Components/SplitScreen';
+import { ContentContainer } from './Components/ContentContainer';
 
 
 
@@ -12,7 +12,9 @@ function App() {
     <div className="App">
       <SplitScreen leftWeight={1} rightWeight={4}>
         <Sidebar onSelection={setPageSelection} />
-        <div>Component {pageSelection} </div>
+        <ContentContainer>
+          <div>Component {pageSelection} </div>
+        </ContentContainer>
       </SplitScreen>
     </div>
   );

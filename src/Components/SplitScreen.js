@@ -3,6 +3,7 @@ import styled from 'styled-components'
 const SplitPaneContainer = styled.div`
   display: flex;
   background: snow;
+  overflow-y: hidden;
 `
 
   const Pane = styled.div`
