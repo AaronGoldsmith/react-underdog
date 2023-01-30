@@ -1,14 +1,34 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import p5 from 'p5';
+import styled from 'styled-components'
+import { Modal } from './Modal'
+import ToggleButton from './UI/Toggle'
+
+const STARTING_IMG = 'https://mj-gallery.com/c5015e03-52d6-4d51-97c1-0c87b4cf7e3f/0_0.webp';
+const Label = styled.label`
+  padding: 10px;
+  margin: 10px;
+`
+const Input = styled.input`
+  margin-left: 10px;
+`
+
+
 
 const Watermarker = () => {
   let myP5;
   const canvasRef = useRef(null);
+  const [toggleState, setToggleState] = useState(false);
+  const [watermarkText, setWatermarkText] = useState("")
   
+  const handleToggle = (state) => {
+    setToggleState(state);
+  };
+
   useEffect(() => {
     myP5 = new p5((p) => {
       let img;
-      let watermarkText = '';
+      // let watermarkText = '';
       let watermarkSize = 1;
       let watermarkColor = 'white'
       let wm = {r: 255, g: 255, b: 255 }
@@ -21,62 +41,55 @@ const Watermarker = () => {
       // Load the image from a URL
       p.preload = () => {
         try{
-          img = p.loadImage("https://mj-gallery.com/7f3b46a1-d33d-4958-832b-8ecebb79efc1/grid_0_384_N.webp");
+          img = p.loadImage(STARTING_IMG);
         }
         catch(e){
           console.log(e)
         }
       }
-      
-      p.imageLoaded = () => {
+
+      p.imageLoaded = (loadedImage) => {
         // Update the canvas size
-        img.width = p.width
-        img.height = p.height 
-        p.resizeCanvas(img.width, img.height);
-        // Draw the image and the watermark
-        p.drawImage();
-      }
-      p.submitForm = () => {
-        // Load the image from the entered URL
-        img = p.loadImage(document.getElementById('imageUrl').value, p.imageLoaded);
-        // Update the canvas size
-        //resizeCanvas(img.width, img.height);
-        // Set the watermark text
-        watermarkText = document.getElementById('watermark').value;
+          const thresholdY = p.windowHeight*0.75
+          if(loadedImage.height > thresholdY){
+             let r = thresholdY / loadedImage.height
+            //  console.log(r)
+            //  console.log(img.height/r)
+            loadedImage.height *= r;
+            loadedImage.width *= r
+          }
+          // Draw the image and the watermark
+            p.resizeCanvas(loadedImage.width, loadedImage.height);
+            img = loadedImage;
+            p.image(img, 0, 0, img.width, img.height);
       }
 
       p.setup = () => {
-        // Create a container element
+        const thresholdY = p.windowHeight*0.75
+        if(img.height > thresholdY){
+           let r = thresholdY / img.height
+          //  console.log(r)
+          //  console.log(img.height/r)
+           img.height *= r;
+           img.width *= r
+        }
         // Create a canvas
         let canvas = p.createCanvas(img.width, img.height);
-        watermarkText = document.getElementById('watermark').value;
-        
+        // watermarkText = document.getElementById('watermark').value;
+      
         canvas.parent(canvasRef.current);
         // Set the text properties
         p.textSize(32)
         p.textAlign(p.LEFT, p.TOP);
         p.fill(255, 0, 0);
 
-
-        //  TODO: Setup submit and uploads
-        // Create the submit button
-        // let submitButton = p.createButton('Submit');
-        // let iconButton = p.createFileInput(p.uploadIcon);
-        // submitButton.position(100, 180);
-        // submitButton.parent(canvasRef.current)
-        // submitButton.mousePressed(p.submitForm);
-        // iconButton.position(90, 80);
-      
-        // p.createOpacitySlider();
-        // p.createSizeSlider()
-        // Draw the image and the watermark
-
-
+        img.height = img.height*0.9
+        p.resizeCanvas(img.width, img.height);
         p.drawImage();
       }
       p.drawImage = () => {
         // Clear the canvas
-        p.clear();
+        // if(typeof p !== 'undefined'){p.clear();}
         // Check if the image needs to be resized
         let scaleFactor = 1;
         // if (img.width > maxWidth) {
@@ -91,7 +104,7 @@ const Watermarker = () => {
         if (iconImg) {
           p.image(iconImg, watermarkX, watermarkY, iconImg.width * watermarkSize, iconImg.height * watermarkSize);
         }
-        else{
+        else if(toggleState){
            p.text(watermarkText, watermarkX, watermarkY, img.width, img.height );
         }
       
@@ -111,15 +124,36 @@ const Watermarker = () => {
         watermarkText = document.getElementById('watermark').value;
       }
       p.keyReleased = (e) => {
-        if(e.key === "Enter"){
+        if(e.key === "Enter" && e.target.id=="imageURL"){
           console.log("loading" + e.target.value)
 
           let inputText = e.target.value//document.activeElement.id
-          img = p.loadImage(inputText, p.imageLoaded)
-        }
-        if(e.target.id==="watermark"){
-          watermarkText = e.target.value;
-        }
+          try{
+            img = p.loadImage(inputText, function(loadedImage){
+              const thresholdY = p.windowHeight*0.75
+              if(loadedImage.height > thresholdY){
+                 let r = thresholdY / loadedImage.height
+                //  console.log(r)
+                //  console.log(img.height/r)
+                loadedImage.height *= r;
+                loadedImage.width *= r
+              }
+              // Draw the image and the watermark
+                p.resizeCanvas(loadedImage.width, loadedImage.height);
+                p.image(loadedImage, 0, 0, loadedImage.width, loadedImage.height);
+               return loadedImage;
+            });
+          }
+          catch(e){
+            console.log(e)
+          }
+         
+         }
+          
+        
+        // if(e.target.id==="watermark"){
+        //   watermarkText = e.target.value;
+        // }
       }
       p.saveImage = () => {
         let imageData = p.get(0, 0, img.width, img.height);
@@ -132,7 +166,8 @@ const Watermarker = () => {
       }
 
       p.draw = () => {
-        if(p.mouseIsPressed){
+
+        if(p.mouseIsPressed && toggleState){
           p.drawImage();
           if(p.mouseX > 0 && p.mouseX < img.width && p.mouseY > 0 && p.mouseY<img.height){
             watermarkX = p.mouseX - p.textWidth(watermarkText)/2
@@ -142,13 +177,32 @@ const Watermarker = () => {
       }
     });
     return () => myP5.remove();
-  },[]);
+  },[watermarkText, toggleState]);
 
   return (
     <>
       <div className="canvasWrapper" ref={canvasRef} />
-      <label>image url</label><input type="text" id="imageURL" defaultValue={"https://mj-gallery.com/7f3b46a1-d33d-4958-832b-8ecebb79efc1/grid_0_384_N.webp"} />
-      <label>watermark text</label> <input type="text" id="watermark" />
+      <div>
+        <p>
+          <Label>image url
+              <Input type="text" id="imageURL"
+              once={true}
+               defaultValue={"https://mj-gallery.com/c5015e03-52d6-4d51-97c1-0c87b4cf7e3f/0_0.webp"} />
+          </Label>
+        </p>
+        <Modal title="Open Controls">
+          <Label>Add Text
+            <Input type="text" id="watermark" defaultValue={watermarkText} 
+                  onKeyUp={e=>setWatermarkText(e.target.value)} />
+          </Label>
+          <ToggleButton value={toggleState} onToggle={handleToggle} />
+        </Modal>
+       <p>
+      
+       </p>
+      
+      </div>
+     
     </>
   )
 }
